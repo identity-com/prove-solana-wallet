@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "prove-solana-wallet",
+  "name": "@identity.com/prove-solana-wallet",
   "author": "Daniel Kelleher <daniel@identity.com>",
   "description": "Prove ownership of a Solana wallet.",
   "module": "dist/prove-solana-wallet.esm.js",
