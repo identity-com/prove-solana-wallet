@@ -18,9 +18,7 @@ const defaultSigner = (keypair: Keypair): SignCallback => async (
 };
 
 type KeyMaterial = Keypair | PublicKey;
-export const isKeypair = (k: KeyMaterial): k is Keypair => k instanceof Keypair;
-export const isPublicKey = (k: KeyMaterial): k is PublicKey =>
-  k instanceof PublicKey;
+export const isKeypair = (k: KeyMaterial): k is Keypair => k.constructor.name === 'Keypair'
 export const pubkeyOf = (k: KeyMaterial): PublicKey =>
   isKeypair(k) ? k.publicKey : k;
 
