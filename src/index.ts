@@ -59,6 +59,7 @@ export const prove = async (
   const { blockhash } = await connection.getRecentBlockhash();
   const transaction = new Transaction({
     recentBlockhash: blockhash,
+    feePayer: publicKey,
   }).add(instruction);
   const signedTransaction = await sign(transaction);
   return signedTransaction.serialize();
