@@ -8,7 +8,7 @@
     "src"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "scripts": {
     "start": "tsdx watch",
@@ -38,23 +38,25 @@
   "size-limit": [
     {
       "path": "dist/prove-solana-wallet.cjs.production.min.js",
-      "limit": "10 KB"
+      "limit": "200 KB"
     },
     {
       "path": "dist/prove-solana-wallet.esm.js",
-      "limit": "10 KB"
+      "limit": "200 KB"
     }
   ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.11.0",
-    "husky": "^6.0.0",
-    "size-limit": "^4.11.0",
+    "@size-limit/preset-small-lib": "^5.0.2",
+    "@types/bs58": "^4.0.1",
+    "husky": "^7.0.1",
+    "size-limit": "^5.0.2",
     "ts-node": "^10.1.0",
     "tsdx": "^0.14.1",
-    "tslib": "^2.2.0",
-    "typescript": "^4.2.4"
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.14.0"
+    "@solana/web3.js": "^1.22.0",
+    "bs58": "^4.0.1"
   }
 }

@@ -31,7 +31,7 @@ const proof = await prove(myKeypair);
 Verifier side:
 ```js
 const {verify} = require('@identity.com/prove-solana-wallet');
-verify(proof, expectedPublicKey);
+await verify(proof, expectedPublicKey);
 ```
 
 Prove ownership of an external wallet (e.g. sol-wallet-adapter).
@@ -55,5 +55,21 @@ wallet.on('connect', async (publicKey) => {
 Verifier side:
 ```js
 const {verify} = require('@identity.com/prove-solana-wallet');
-verify(proof, expectedPublicKey);
+await verify(proof, expectedPublicKey);
 ```
+
+## Details
+
+The prove() function generates a zero-value transaction, and
+signs it with the wallet private key. For the transaction to be verified
+by the verify() function, it must:
+
+- have ony one instruction: SystemProgram.transfer
+- be zero-value
+- be self-to-self (i.e the sender and recipient are the same)
+- have a recent blockhash on mainnet
+- but not be broadcast to mainnet
+
+These measures increase the security by reducing the likelihood
+that an attacker can either coerce the wallet owner to sign
+a transaction or intercept a broadcast one.
