@@ -1,36 +1,24 @@
 import {
-  Cluster,
   clusterApiUrl,
-  Commitment,
   Connection,
   Keypair,
   PublicKey,
-  SystemProgram,
   Transaction,
 } from '@solana/web3.js';
+import {
+  checkRecentBlock,
+  checkSignatures,
+  checkTransactionNotBroadcast,
+  checkTransactionParameters,
+  Config,
+  DEFAULT_CONFIG,
+  defaultSigner,
+  isKeypair,
+  makeTransaction,
+  pubkeyOf,
+  SignCallback,
+} from './utilities';
 
-export type SignCallback = (transaction: Transaction) => Promise<Transaction>;
-const defaultSigner = (keypair: Keypair): SignCallback => async (
-  transaction: Transaction
-) => {
-  transaction.sign(keypair);
-  return transaction;
-};
-
-type KeyMaterial = Keypair | PublicKey;
-export const isKeypair = (k: KeyMaterial): k is Keypair =>
-  k.constructor.name === 'Keypair';
-export const pubkeyOf = (k: KeyMaterial): PublicKey =>
-  isKeypair(k) ? k.publicKey : k;
-
-type Config = {
-  cluster: Cluster;
-  commitment: Commitment;
-};
-const DEFAULT_CONFIG: Config = {
-  cluster: 'mainnet-beta',
-  commitment: 'confirmed',
-};
 export const prove = async (
   key: PublicKey | Keypair,
   signer?: SignCallback,
@@ -49,32 +37,39 @@ export const prove = async (
 
   const publicKey = pubkeyOf(key);
 
-  // any instruction that requires a signature
-  const instruction = SystemProgram.transfer({
-    fromPubkey: publicKey,
-    lamports: 0,
-    toPubkey: publicKey,
-  });
-
-  const { blockhash } = await connection.getRecentBlockhash();
-  const transaction = new Transaction({
-    recentBlockhash: blockhash,
-    feePayer: publicKey,
-  }).add(instruction);
+  const transaction = await makeTransaction(
+    connection,
+    publicKey,
+    publicKey,
+    0
+  );
   const signedTransaction = await sign(transaction);
   return signedTransaction.serialize();
 };
 
-export const verify = (evidence: Buffer, publicKey: PublicKey): void => {
+export const verifyStatic = (evidence: Buffer, publicKey: PublicKey): void => {
   const transaction = Transaction.from(evidence);
-  if (!transaction.verifySignatures()) {
-    // some expected signature is missing
-    throw new Error('Signatures not verified');
-  }
-  const signatureForExpectedKey = transaction.signatures.find(
-    signaturePubkeyPair => signaturePubkeyPair.publicKey.equals(publicKey)
+
+  checkSignatures(transaction, publicKey);
+  checkTransactionParameters(transaction);
+};
+
+export const verify = async (
+  evidence: Buffer,
+  publicKey: PublicKey,
+  config: Config = DEFAULT_CONFIG
+): Promise<void> => {
+  verifyStatic(evidence, publicKey);
+
+  const transaction = Transaction.from(evidence);
+
+  const conn = new Connection(clusterApiUrl(config.cluster), config.commitment);
+
+  const checkTransactionNotBroadcastPromise = checkTransactionNotBroadcast(
+    conn,
+    transaction
   );
-  if (!signatureForExpectedKey) {
-    throw new Error('Missing signature for ' + publicKey.toBase58());
-  }
+  const checkBlockPromise = checkRecentBlock(conn, transaction);
+
+  await Promise.all([checkTransactionNotBroadcastPromise, checkBlockPromise]);
 };
