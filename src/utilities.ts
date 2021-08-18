@@ -1,5 +1,6 @@
 import {
   Cluster,
+  clusterApiUrl,
   Commitment,
   Connection,
   Keypair,
@@ -25,14 +26,39 @@ export const isKeypair = (k: KeyMaterial): k is Keypair =>
 export const pubkeyOf = (k: KeyMaterial): PublicKey =>
   isKeypair(k) ? k.publicKey : k;
 
+export type ClusterUrlMap = Record<string, string>;
+
 export type Config = {
-  cluster: Cluster;
+  // the cluster that should be used when generating proofs
+  // and the default cluster used when verifying proofs, unless overridden
+  // in the proof itself
+  cluster: string;
+  // when checking that a proof transaction has not been transmitted, the commitment
+  // to be used, i.e. the degree to which the transaction is finalised by the network
   commitment: Commitment;
+  // if the cluster is not a standard solana public cluster, this map provides
+  // the cluster URL to connect to. Use this when the proof may contain a cluster that is
+  // not recognised by solana's clusterApiUrl function
+  supportedClusterUrls?: ClusterUrlMap;
 };
 
 export const DEFAULT_CONFIG: Config = {
   cluster: 'mainnet-beta',
   commitment: 'confirmed',
+  supportedClusterUrls: {},
+};
+
+// get the solana cluster URL to connect to. Use the cluster in the config,
+// unless overridden. If the cluster is referenced in supportedClusterUrls,
+// use the clusterUrl specified there, otherwise use the default solana one
+export const getClusterUrl = (config: Config) => {
+  if (
+    config.supportedClusterUrls &&
+    config.supportedClusterUrls[config.cluster]
+  ) {
+    return config.supportedClusterUrls[config.cluster];
+  }
+  return clusterApiUrl(config.cluster as Cluster);
 };
 
 export const makeTransaction = async (

@@ -5,8 +5,9 @@ import {
   Connection,
   clusterApiUrl,
   PublicKey,
+  Cluster,
 } from '@solana/web3.js';
-import { DEFAULT_CONFIG, makeTransaction } from '../src/utilities';
+import { Config, DEFAULT_CONFIG, makeTransaction } from '../src/utilities';
 
 describe('prove-solana-wallet', () => {
   afterEach(() => jest.restoreAllMocks());
@@ -14,7 +15,7 @@ describe('prove-solana-wallet', () => {
   let myKeypair: Keypair;
 
   const connection = new Connection(
-    clusterApiUrl(DEFAULT_CONFIG.cluster),
+    clusterApiUrl(DEFAULT_CONFIG.cluster as Cluster),
     DEFAULT_CONFIG.commitment
   );
 
@@ -35,6 +36,21 @@ describe('prove-solana-wallet', () => {
 
     const proof = await prove(myKeypair.publicKey, externalWalletSignCallback);
     await expect(verify(proof, myKeypair.publicKey)).resolves.not.toThrow();
+  });
+
+  it('supports using a non-standard cluster url', async () => {
+    const config: Config = {
+      cluster: 'mynet',
+      commitment: 'confirmed',
+      supportedClusterUrls: {
+        // in this test, "mynet" is basically an alias for mainnet, but it could be any cluster
+        mynet: 'https://api.mainnet-beta.solana.com/',
+      },
+    };
+    const proof = await prove(myKeypair, undefined, config);
+    await expect(
+      verify(proof, myKeypair.publicKey, config)
+    ).resolves.not.toThrow();
   });
 
   it('throws an error if the transaction is signed with a different key', async () => {
