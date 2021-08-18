@@ -73,3 +73,28 @@ by the verify() function, it must:
 These measures increase the security by reducing the likelihood
 that an attacker can either coerce the wallet owner to sign
 a transaction or intercept a broadcast one.
+
+## Configuration
+
+The prove and verify functions can be configured as follows:
+
+### `cluster`
+
+Default: `mainnet-beta`
+
+The cluster that should be used when generating and verifying proofs
+
+### `commitment`
+
+Default: `confirmed`
+
+When checking that a proof transaction has not been transmitted, the commitment to be used, i.e. the degree to which the transaction is finalised by the network
+
+### `supportedClusterUrls`
+
+Optional
+Default: empty
+
+If the cluster is not a standard solana public cluster, this map provides
+the cluster URL to connect to. Use this when the proof may contain a cluster that is
+not recognised by solana's clusterApiUrl function.
