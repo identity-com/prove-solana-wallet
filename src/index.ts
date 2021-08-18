@@ -1,10 +1,4 @@
-import {
-  clusterApiUrl,
-  Connection,
-  Keypair,
-  PublicKey,
-  Transaction,
-} from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import {
   checkRecentBlock,
   checkSignatures,
@@ -13,6 +7,7 @@ import {
   Config,
   DEFAULT_CONFIG,
   defaultSigner,
+  getClusterUrl,
   isKeypair,
   makeTransaction,
   pubkeyOf,
@@ -32,10 +27,7 @@ export const prove = async (
     throw new Error('Provide either a keypair or a signer');
   const sign = signer || defaultSigner(key as Keypair);
 
-  const connection = new Connection(
-    clusterApiUrl(config.cluster),
-    config.commitment
-  );
+  const connection = new Connection(getClusterUrl(config), config.commitment);
 
   const publicKey = pubkeyOf(key);
 
@@ -65,7 +57,7 @@ export const verify = async (
 
   const transaction = Transaction.from(evidence);
 
-  const conn = new Connection(clusterApiUrl(config.cluster), config.commitment);
+  const conn = new Connection(getClusterUrl(config), config.commitment);
 
   const checkTransactionNotBroadcastPromise = checkTransactionNotBroadcast(
     conn,
