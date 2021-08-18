@@ -29,9 +29,7 @@ export const pubkeyOf = (k: KeyMaterial): PublicKey =>
 export type ClusterUrlMap = Record<string, string>;
 
 export type Config = {
-  // the cluster that should be used when generating proofs
-  // and the default cluster used when verifying proofs, unless overridden
-  // in the proof itself
+  // the cluster that should be used when generating and verifying proofs
   cluster: string;
   // when checking that a proof transaction has not been transmitted, the commitment
   // to be used, i.e. the degree to which the transaction is finalised by the network

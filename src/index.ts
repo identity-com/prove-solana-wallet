@@ -14,7 +14,7 @@ import {
   SignCallback,
 } from './utilities';
 
-export { SignCallback } from './utilities';
+export { SignCallback, Config } from './utilities';
 
 export const prove = async (
   key: PublicKey | Keypair,
