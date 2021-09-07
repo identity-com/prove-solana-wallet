@@ -46,6 +46,7 @@ describe('prove-solana-wallet', () => {
         // in this test, "mynet" is basically an alias for mainnet, but it could be any cluster
         mynet: 'https://api.mainnet-beta.solana.com/',
       },
+      recentBlockCheck: true,
     };
     const proof = await prove(myKeypair, undefined, config);
     await expect(
@@ -77,6 +78,30 @@ describe('prove-solana-wallet', () => {
     await expect(verify(proof, myKeypair.publicKey)).rejects.toThrow(
       'Block was not found'
     );
+  });
+
+  it('allows an old transaction if recentBlockCheck is disabled', async () => {
+    // A blockhash on mainnet from july 2021 (epoch 206)
+    const oldBlockhash = 'HsH8JCpHtNwo9LgMZcxA8g7DGQu7HQDcDGcCvJSM9iZZ';
+
+    const config = {
+      ...DEFAULT_CONFIG,
+      recentBlockCheck: false,
+    };
+
+    jest
+      .spyOn(Connection.prototype, 'getRecentBlockhash')
+      .mockImplementation(() =>
+        Promise.resolve({
+          blockhash: oldBlockhash,
+          feeCalculator: { lamportsPerSignature: 0 },
+        })
+      );
+
+    const proof = await prove(myKeypair);
+    await expect(
+      verify(proof, myKeypair.publicKey, config)
+    ).resolves.not.toThrow();
   });
 
   it('throws an error if the transaction amout is non-zero', async () => {
