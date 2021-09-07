@@ -38,12 +38,17 @@ export type Config = {
   // the cluster URL to connect to. Use this when the proof may contain a cluster that is
   // not recognised by solana's clusterApiUrl function
   supportedClusterUrls?: ClusterUrlMap;
+  // If true, check that the transaction includes a recent blockhash.
+  // Disable if nodes are having difficulty synchronising,
+  // warning - this makes replay attacks easier as proofs remain valid longer
+  recentBlockCheck: boolean;
 };
 
 export const DEFAULT_CONFIG: Config = {
   cluster: 'mainnet-beta',
   commitment: 'confirmed',
   supportedClusterUrls: {},
+  recentBlockCheck: true,
 };
 
 // get the solana cluster URL to connect to. Use the cluster in the config,

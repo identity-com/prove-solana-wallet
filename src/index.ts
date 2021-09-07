@@ -63,7 +63,9 @@ export const verify = async (
     conn,
     transaction
   );
-  const checkBlockPromise = checkRecentBlock(conn, transaction);
+  const checkBlockPromise = config.recentBlockCheck
+    ? checkRecentBlock(conn, transaction)
+    : Promise.resolve();
 
   await Promise.all([checkTransactionNotBroadcastPromise, checkBlockPromise]);
 };
