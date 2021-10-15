@@ -54,6 +54,19 @@ describe('prove-solana-wallet', () => {
     ).resolves.not.toThrow();
   });
 
+  it('uses a passed-in-connection', async () => {
+    const config: Config = {
+      cluster: 'devnet',
+      commitment: 'confirmed',
+      connection: new Connection(clusterApiUrl('devnet'), 'confirmed'),
+      recentBlockCheck: true,
+    };
+    const proof = await prove(myKeypair, undefined, config);
+    await expect(
+      verify(proof, myKeypair.publicKey, config)
+    ).resolves.not.toThrow();
+  });
+
   it('throws an error if the transaction is signed with a different key', async () => {
     const someOtherKey = Keypair.generate().publicKey;
 
