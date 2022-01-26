@@ -42,6 +42,11 @@ export type Config = {
   // Disable if nodes are having difficulty synchronising,
   // warning - this makes replay attacks easier as proofs remain valid longer
   recentBlockCheck: boolean;
+  // If true, check that the transaction has not been broadcast.
+  // Disable if it is taking too long to check.
+  // warning - this allows attackers to use replay attacks by looking up a transaction on chain and
+  // using it as proof without having the private key
+  broadcastCheck: boolean;
   /// If set, use this connection rather than creating a new one - ignores cluster, commitment, supportedClusterUrls
   connection?: Connection;
 };
@@ -51,6 +56,7 @@ export const DEFAULT_CONFIG: Config = {
   commitment: 'confirmed',
   supportedClusterUrls: {},
   recentBlockCheck: true,
+  broadcastCheck: true,
 };
 
 // get the solana cluster URL to connect to. Use the cluster in the config,
