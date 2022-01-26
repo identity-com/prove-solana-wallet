@@ -63,10 +63,10 @@ export const verify = async (
     config.connection ||
     new Connection(getClusterUrl(config), config.commitment);
 
-  const checkTransactionNotBroadcastPromise = checkTransactionNotBroadcast(
-    connection,
-    transaction
-  );
+  const checkTransactionNotBroadcastPromise = config.broadcastCheck
+    ? checkTransactionNotBroadcast(connection, transaction)
+    : Promise.resolve();
+
   const checkBlockPromise = config.recentBlockCheck
     ? checkRecentBlock(connection, transaction)
     : Promise.resolve();

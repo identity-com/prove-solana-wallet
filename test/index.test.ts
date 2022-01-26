@@ -5,7 +5,6 @@ import {
   Connection,
   clusterApiUrl,
   PublicKey,
-  Cluster,
 } from '@solana/web3.js';
 import { Config, DEFAULT_CONFIG, makeTransaction } from '../src/utilities';
 
@@ -15,12 +14,13 @@ describe('prove-solana-wallet', () => {
   let myKeypair: Keypair;
 
   const connection = new Connection(
-    clusterApiUrl(DEFAULT_CONFIG.cluster as Cluster),
+    clusterApiUrl('devnet'),
     DEFAULT_CONFIG.commitment
   );
 
   beforeEach(() => {
     myKeypair = Keypair.generate();
+    DEFAULT_CONFIG.cluster = 'devnet';
   });
 
   it('verifies wallet ownership with provided key', async () => {
@@ -43,10 +43,11 @@ describe('prove-solana-wallet', () => {
       cluster: 'mynet',
       commitment: 'confirmed',
       supportedClusterUrls: {
-        // in this test, "mynet" is basically an alias for mainnet, but it could be any cluster
-        mynet: 'https://api.mainnet-beta.solana.com/',
+        // in this test, "mynet" is basically an alias for devnet, but it could be any cluster
+        mynet: 'https://api.devnet.solana.com/',
       },
       recentBlockCheck: true,
+      broadcastCheck: true,
     };
     const proof = await prove(myKeypair, undefined, config);
     await expect(
@@ -60,6 +61,7 @@ describe('prove-solana-wallet', () => {
       commitment: 'confirmed',
       connection: new Connection(clusterApiUrl('devnet'), 'confirmed'),
       recentBlockCheck: true,
+      broadcastCheck: true,
     };
     const proof = await prove(myKeypair, undefined, config);
     await expect(
@@ -151,18 +153,15 @@ describe('prove-solana-wallet', () => {
     );
   });
 
-  it('throws an error if the transaction was broadcast', async () => {
+  // Skip to avoid rate-limiting on mainnet - TODO switch this one to devnet
+  it.skip('throws an error if the transaction was broadcast', async () => {
     // this is a self-to-self transaction broadcast to mainnet in july 2021
     const transactionPublicKey = new PublicKey(
       '2B64EYBMqrPTHyqXWYeJYT4QmqVgwc4vQ7qbLrBJ6J6n'
     );
-    const transactionSignature =
-      '61eu2kkizCGrDDVwWoG7tijS6ZSzZeyqxQvfhog3TqfptHV4GhV92wEtiNtuFKJNPgsRjLXa8HejfDPVMgK4Jqig';
-    const transaction = await connection
-      .getConfirmedTransaction(transactionSignature)
-      .then(response => response!.transaction);
-
-    const proof = transaction.serialize();
+    const transaction =
+      'AfqmAU243f1RyJUeSCu9wNNivwAiO8QNmVKDA8biALn8CBCb6jFNT4WKvgtzl7kRnATr27lTEQNdmAQZVOm5BwkBAAECEXE2KXQBAW2MC9Y8dPoDnheiXINczzUNFGfMaNC79YsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADtvR4/w2jei6eOB72wd18W6ofvsMpMoGXvCZP0yP1g1AQECAAAMAgAAAAAAAAAAAAAA';
+    const proof = Buffer.from(transaction, 'base64');
 
     // stub out the recent blockhash check with a valid recent blockhash
     jest
@@ -177,5 +176,24 @@ describe('prove-solana-wallet', () => {
     await expect(verify(proof, transactionPublicKey)).rejects.toThrow(
       'Transaction was broadcast!'
     );
+  });
+
+  it('allows a broadcast transaction if broadcastCheck is disabled', async () => {
+    // this is a self-to-self transaction broadcast to mainnet in july 2021
+    const transactionPublicKey = new PublicKey(
+      '2B64EYBMqrPTHyqXWYeJYT4QmqVgwc4vQ7qbLrBJ6J6n'
+    );
+    const transaction =
+      'AfqmAU243f1RyJUeSCu9wNNivwAiO8QNmVKDA8biALn8CBCb6jFNT4WKvgtzl7kRnATr27lTEQNdmAQZVOm5BwkBAAECEXE2KXQBAW2MC9Y8dPoDnheiXINczzUNFGfMaNC79YsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADtvR4/w2jei6eOB72wd18W6ofvsMpMoGXvCZP0yP1g1AQECAAAMAgAAAAAAAAAAAAAA';
+    const proof = Buffer.from(transaction, 'base64');
+
+    const config = {
+      ...DEFAULT_CONFIG,
+      broadcastCheck: false,
+      recentBlockCheck: false,
+    };
+    await expect(
+      verify(proof, transactionPublicKey, config)
+    ).resolves.not.toThrow();
   });
 });
