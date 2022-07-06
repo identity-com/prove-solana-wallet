@@ -81,11 +81,11 @@ describe('prove-solana-wallet', () => {
     const oldBlockhash = 'HsH8JCpHtNwo9LgMZcxA8g7DGQu7HQDcDGcCvJSM9iZZ';
 
     jest
-      .spyOn(Connection.prototype, 'getRecentBlockhash')
+      .spyOn(Connection.prototype, 'getLatestBlockhash')
       .mockImplementation(() =>
         Promise.resolve({
           blockhash: oldBlockhash,
-          feeCalculator: { lamportsPerSignature: 0 },
+          lastValidBlockHeight: 12345,
         })
       );
 

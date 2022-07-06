@@ -84,9 +84,13 @@ export const makeTransaction = async (
     toPubkey,
   });
 
-  const { blockhash } = await connection.getRecentBlockhash();
+  const {
+    blockhash,
+    lastValidBlockHeight,
+  } = await connection.getLatestBlockhash();
   return new Transaction({
-    recentBlockhash: blockhash,
+    blockhash,
+    lastValidBlockHeight,
     feePayer: fromPubkey,
   }).add(instruction);
 };
@@ -151,7 +155,7 @@ export const checkTransactionParameters = (transaction: Transaction) => {
 
   if (!transferParams.fromPubkey.equals(transferParams.toPubkey))
     throw new Error('The transaction must be self-to-self');
-  if (transferParams.lamports !== 0)
+  if (transferParams.lamports.valueOf() !== BigInt(0))
     throw new Error('The transaction must have zero value');
 };
 
