@@ -155,7 +155,7 @@ export const checkTransactionParameters = (transaction: Transaction) => {
 
   if (!transferParams.fromPubkey.equals(transferParams.toPubkey))
     throw new Error('The transaction must be self-to-self');
-  if (transferParams.lamports.valueOf() !== BigInt(0))
+  if (transferParams.lamports !== BigInt(0))
     throw new Error('The transaction must have zero value');
 };
 
