@@ -88,11 +88,13 @@ export const makeTransaction = async (
     blockhash,
     lastValidBlockHeight,
   } = await connection.getLatestBlockhash();
-  return new Transaction({
+  const tx = new Transaction({
     blockhash,
     lastValidBlockHeight,
     feePayer: fromPubkey,
   }).add(instruction);
+  tx.recentBlockhash = blockhash;
+  return tx;
 };
 
 const findBlock = async (
