@@ -1,5 +1,5 @@
 {
-  "version": "0.2.5",
+  "version": "0.2.8",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -15,6 +15,7 @@
     "build": "tsdx build",
     "test": "tsdx test",
     "lint": "tsdx lint",
+    "lint:fix": "yarn lint --fix",
     "prepare": "tsdx build",
     "size": "size-limit",
     "analyze": "size-limit --why"
@@ -59,7 +60,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.22.0",
+    "@solana/web3.js": "^1.44.0",
     "bs58": "^4.0.1"
   }
 }
