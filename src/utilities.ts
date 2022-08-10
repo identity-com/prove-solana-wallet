@@ -84,11 +84,16 @@ export const makeTransaction = async (
     toPubkey,
   });
 
-  const { blockhash } = await connection.getLatestBlockhash();
+  const {
+    blockhash,
+    lastValidBlockHeight,
+  } = await connection.getLatestBlockhash();
   const tx = new Transaction({
-    recentBlockhash: blockhash,
+    blockhash,
+    lastValidBlockHeight,
     feePayer: fromPubkey,
   }).add(instruction);
+  tx.recentBlockhash = blockhash;
   return tx;
 };
 
