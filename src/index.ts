@@ -30,11 +30,11 @@ export const create = async (
   return `${signatureB64}`;
 };
 
-export const verify = async (
+export const verify = (
   publicKey: PublicKey,
   signature: string,
   message: string
-): Promise<boolean> => {
+): boolean => {
   const decodedSignature = Buffer.from(signature, 'base64');
   const decodedMessage = Buffer.from(message);
   const verified = nacl.sign.detached.verify(

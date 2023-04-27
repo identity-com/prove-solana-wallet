@@ -33,7 +33,7 @@ Verifier side:
 ```js
 const {verify} = require('@identity.com/prove-solana-wallet');
 const message = timestamp;
-await verify(expectedPublicKey, proof, message);
+verify(expectedPublicKey, proof, message);
 ```
 
 ### prove ownership of a keypair using a transaction

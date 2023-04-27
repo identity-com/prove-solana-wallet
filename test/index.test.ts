@@ -51,9 +51,7 @@ describe('prove-solana-wallet', () => {
           nacl.sign.detached(Buffer.from(message), myKeypair.secretKey)
         );
       const proof = await create(signMessageFn, message);
-      await expect(
-        verify(myKeypair.publicKey, proof, message)
-      ).resolves.not.toThrow();
+      expect(() => verify(myKeypair.publicKey, proof, message)).not.toThrow();
     });
 
     it('should throw an error if the transaction is signed with a different key', async () => {
@@ -66,9 +64,7 @@ describe('prove-solana-wallet', () => {
           ),
         message
       );
-      await expect(
-        verify(myKeypair.publicKey, proof, message)
-      ).rejects.toThrow();
+      expect(() => verify(myKeypair.publicKey, proof, message)).toThrow();
     });
   });
 
