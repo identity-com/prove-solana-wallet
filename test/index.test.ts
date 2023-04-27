@@ -1,4 +1,10 @@
-import { proveTransaction, verifyTransaction, create, verify, SignMessageFn } from '../src';
+import {
+  proveTransaction,
+  verifyTransaction,
+  create,
+  verify,
+  SignMessageFn,
+} from '../src';
 import {
   Transaction,
   Connection,
@@ -22,9 +28,11 @@ describe('prove-solana-wallet', () => {
   let signMessageFn: SignMessageFn;
   let message: string;
   beforeEach(() => {
-    
     myKeypair = Keypair.generate();
-    signMessageFn = (message: string) => Promise.resolve(nacl.sign.detached(Buffer.from(message), myKeypair.secretKey));
+    signMessageFn = (message: string) =>
+      Promise.resolve(
+        nacl.sign.detached(Buffer.from(message), myKeypair.secretKey)
+      );
     DEFAULT_CONFIG.cluster = 'devnet';
     message = new Date().getTime().toString();
   });
@@ -33,18 +41,27 @@ describe('prove-solana-wallet', () => {
       const proof = await create(signMessageFn, message);
       expect(proof).toMatch(/.*\..*/); // the message is a base64 version of the signature concatenated with the message
     });
-  
+
     it('verifies wallet ownership with provided signer function', async () => {
       myKeypair = Keypair.generate();
-      signMessageFn = (message: string) => Promise.resolve(nacl.sign.detached(Buffer.from(message), myKeypair.secretKey));
+      signMessageFn = (message: string) =>
+        Promise.resolve(
+          nacl.sign.detached(Buffer.from(message), myKeypair.secretKey)
+        );
       const proof = await create(signMessageFn, message);
       await expect(verify(myKeypair.publicKey, proof)).resolves.not.toThrow();
     });
-  
+
     it('throws an error if the transaction is signed with a different key', async () => {
       const someOtherKey = Keypair.generate();
-  
-      const proof = await create((message: string) => Promise.resolve(nacl.sign.detached(Buffer.from(message), someOtherKey.secretKey)), message);
+
+      const proof = await create(
+        (message: string) =>
+          Promise.resolve(
+            nacl.sign.detached(Buffer.from(message), someOtherKey.secretKey)
+          ),
+        message
+      );
       await expect(verify(myKeypair.publicKey, proof)).rejects.toThrow();
     });
   });
@@ -52,7 +69,9 @@ describe('prove-solana-wallet', () => {
   describe('proveTransaction and verifyTransaction', () => {
     it('verifies wallet ownership with provided key', async () => {
       const proof = await proveTransaction(myKeypair);
-      await expect(verifyTransaction(proof, myKeypair.publicKey)).resolves.not.toThrow();
+      await expect(
+        verifyTransaction(proof, myKeypair.publicKey)
+      ).resolves.not.toThrow();
     });
 
     it('prove ownership of an external wallet', async () => {
@@ -60,9 +79,14 @@ describe('prove-solana-wallet', () => {
         transaction.sign(myKeypair);
         return transaction;
       };
-  
-      const proof = await proveTransaction(myKeypair.publicKey, externalWalletSignCallback);
-      await expect(verifyTransaction(proof, myKeypair.publicKey)).resolves.not.toThrow();
+
+      const proof = await proveTransaction(
+        myKeypair.publicKey,
+        externalWalletSignCallback
+      );
+      await expect(
+        verifyTransaction(proof, myKeypair.publicKey)
+      ).resolves.not.toThrow();
     });
 
     it('supports using a non-standard cluster url', async () => {
@@ -98,15 +122,15 @@ describe('prove-solana-wallet', () => {
 
     it('throws an error if the transaction is signed with a different key', async () => {
       const someOtherKey = Keypair.generate().publicKey;
-  
+
       const proof = await proveTransaction(myKeypair);
       await expect(verifyTransaction(proof, someOtherKey)).rejects.toThrow();
     });
-  
+
     it('throws an error if the transaction is too old', async () => {
       // A blockhash on mainnet from july 2021 (epoch 206)
       const oldBlockhash = 'HsH8JCpHtNwo9LgMZcxA8g7DGQu7HQDcDGcCvJSM9iZZ';
-  
+
       jest
         .spyOn(Connection.prototype, 'getLatestBlockhash')
         .mockImplementation(() =>
@@ -115,22 +139,22 @@ describe('prove-solana-wallet', () => {
             lastValidBlockHeight: 12345,
           })
         );
-  
+
       const proof = await proveTransaction(myKeypair);
-      await expect(verifyTransaction(proof, myKeypair.publicKey)).rejects.toThrow(
-        'Block was not found'
-      );
+      await expect(
+        verifyTransaction(proof, myKeypair.publicKey)
+      ).rejects.toThrow('Block was not found');
     });
-  
+
     it('allows an old transaction if recentBlockCheck is disabled', async () => {
       // A blockhash on mainnet from july 2021 (epoch 206)
       const oldBlockhash = 'HsH8JCpHtNwo9LgMZcxA8g7DGQu7HQDcDGcCvJSM9iZZ';
-  
+
       const config = {
         ...DEFAULT_CONFIG,
         recentBlockCheck: false,
       };
-  
+
       jest
         .spyOn(Connection.prototype, 'getRecentBlockhash')
         .mockImplementation(() =>
@@ -139,13 +163,13 @@ describe('prove-solana-wallet', () => {
             feeCalculator: { lamportsPerSignature: 0 },
           })
         );
-  
+
       const proof = await proveTransaction(myKeypair);
       await expect(
         verifyTransaction(proof, myKeypair.publicKey, config)
       ).resolves.not.toThrow();
     });
-  
+
     it('throws an error if the transaction amout is non-zero', async () => {
       const amount = 100;
       const transaction = await makeTransaction(
@@ -155,14 +179,14 @@ describe('prove-solana-wallet', () => {
         amount
       );
       transaction.sign(myKeypair);
-  
+
       const proof = transaction.serialize();
-  
-      await expect(verifyTransaction(proof, myKeypair.publicKey)).rejects.toThrow(
-        'The transaction must have zero value'
-      );
+
+      await expect(
+        verifyTransaction(proof, myKeypair.publicKey)
+      ).rejects.toThrow('The transaction must have zero value');
     });
-  
+
     it('throws an error if the transaction is not self-signed', async () => {
       const someOtherKey = Keypair.generate().publicKey;
       const transaction = await makeTransaction(
@@ -172,14 +196,14 @@ describe('prove-solana-wallet', () => {
         0
       );
       transaction.sign(myKeypair);
-  
+
       const proof = transaction.serialize();
-  
-      await expect(verifyTransaction(proof, myKeypair.publicKey)).rejects.toThrow(
-        'The transaction must be self-to-self'
-      );
+
+      await expect(
+        verifyTransaction(proof, myKeypair.publicKey)
+      ).rejects.toThrow('The transaction must be self-to-self');
     });
-  
+
     // Skip to avoid rate-limiting on mainnet - TODO switch this one to devnet
     it.skip('throws an error if the transaction was broadcast', async () => {
       // this is a self-to-self transaction broadcast to mainnet in july 2021
@@ -189,7 +213,7 @@ describe('prove-solana-wallet', () => {
       const transaction =
         'AfqmAU243f1RyJUeSCu9wNNivwAiO8QNmVKDA8biALn8CBCb6jFNT4WKvgtzl7kRnATr27lTEQNdmAQZVOm5BwkBAAECEXE2KXQBAW2MC9Y8dPoDnheiXINczzUNFGfMaNC79YsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADtvR4/w2jei6eOB72wd18W6ofvsMpMoGXvCZP0yP1g1AQECAAAMAgAAAAAAAAAAAAAA';
       const proof = Buffer.from(transaction, 'base64');
-  
+
       // stub out the recent blockhash check with a valid recent blockhash
       jest
         .spyOn(Connection.prototype, 'getFeeCalculatorForBlockhash')
@@ -199,12 +223,12 @@ describe('prove-solana-wallet', () => {
             context: { slot: 0 },
           })
         );
-  
-      await expect(verifyTransaction(proof, transactionPublicKey)).rejects.toThrow(
-        'Transaction was broadcast!'
-      );
+
+      await expect(
+        verifyTransaction(proof, transactionPublicKey)
+      ).rejects.toThrow('Transaction was broadcast!');
     });
-  
+
     it('allows a broadcast transaction if broadcastCheck is disabled', async () => {
       // this is a self-to-self transaction broadcast to mainnet in july 2021
       const transactionPublicKey = new PublicKey(
@@ -213,7 +237,7 @@ describe('prove-solana-wallet', () => {
       const transaction =
         'AfqmAU243f1RyJUeSCu9wNNivwAiO8QNmVKDA8biALn8CBCb6jFNT4WKvgtzl7kRnATr27lTEQNdmAQZVOm5BwkBAAECEXE2KXQBAW2MC9Y8dPoDnheiXINczzUNFGfMaNC79YsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADtvR4/w2jei6eOB72wd18W6ofvsMpMoGXvCZP0yP1g1AQECAAAMAgAAAAAAAAAAAAAA';
       const proof = Buffer.from(transaction, 'base64');
-  
+
       const config = {
         ...DEFAULT_CONFIG,
         broadcastCheck: false,

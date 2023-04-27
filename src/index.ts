@@ -17,9 +17,7 @@ import nacl from 'tweetnacl';
 
 export { SignCallback, Config, DEFAULT_CONFIG } from './utilities';
 
-export type SignMessageFn =(
-  message: string
-) => Promise<Uint8Array>;
+export type SignMessageFn = (message: string) => Promise<Uint8Array>;
 
 export const create = async (
   signMessage: SignMessageFn,
@@ -35,13 +33,17 @@ export const create = async (
 
 export const verify = async (
   publicKey: PublicKey,
-  proof: string,
+  proof: string
 ): Promise<boolean> => {
   const [message, signature] = proof.split('.');
   const decodedSignature = Buffer.from(signature, 'base64');
   const decodedMessage = Buffer.from(message, 'base64');
 
-  const verified = nacl.sign.detached.verify(decodedMessage, decodedSignature, publicKey.toBytes())
+  const verified = nacl.sign.detached.verify(
+    decodedMessage,
+    decodedSignature,
+    publicKey.toBytes()
+  );
   if (!verified) {
     throw new Error('Invalid proof');
   }
