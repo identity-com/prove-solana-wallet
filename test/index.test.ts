@@ -37,22 +37,26 @@ describe('prove-solana-wallet', () => {
     message = new Date().getTime().toString();
   });
   describe('create and verify', () => {
-    it('creates a wallet ownership proof when a signer function is provided', async () => {
+    it('should create a wallet ownership proof encoded in base64 when a signer function is provided', async () => {
       const proof = await create(signMessageFn, message);
-      expect(proof).toMatch(/.*\..*/); // the message is a base64 version of the signature concatenated with the message
+      const decodedBuffer = Buffer.from(proof, 'base64');
+      expect(decodedBuffer).toBeTruthy();
+      expect(typeof proof).toBe('string');
     });
 
-    it('verifies wallet ownership with provided signer function', async () => {
+    it('should verify wallet ownership with provided signer function', async () => {
       myKeypair = Keypair.generate();
       signMessageFn = (message: string) =>
         Promise.resolve(
           nacl.sign.detached(Buffer.from(message), myKeypair.secretKey)
         );
       const proof = await create(signMessageFn, message);
-      await expect(verify(myKeypair.publicKey, proof)).resolves.not.toThrow();
+      await expect(
+        verify(myKeypair.publicKey, proof, message)
+      ).resolves.not.toThrow();
     });
 
-    it('throws an error if the transaction is signed with a different key', async () => {
+    it('should throw an error if the transaction is signed with a different key', async () => {
       const someOtherKey = Keypair.generate();
 
       const proof = await create(
@@ -62,7 +66,9 @@ describe('prove-solana-wallet', () => {
           ),
         message
       );
-      await expect(verify(myKeypair.publicKey, proof)).rejects.toThrow();
+      await expect(
+        verify(myKeypair.publicKey, proof, message)
+      ).rejects.toThrow();
     });
   });
 

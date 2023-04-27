@@ -26,19 +26,17 @@ export const create = async (
   const signature = await signMessage(message);
   if (!signature) throw new Error('Error creating signature');
 
-  const messageB64 = Buffer.from(message).toString('base64');
   const signatureB64 = Buffer.from(signature).toString('base64');
-  return `${messageB64}.${signatureB64}`;
+  return `${signatureB64}`;
 };
 
 export const verify = async (
   publicKey: PublicKey,
-  proof: string
+  signature: string,
+  message: string
 ): Promise<boolean> => {
-  const [message, signature] = proof.split('.');
   const decodedSignature = Buffer.from(signature, 'base64');
-  const decodedMessage = Buffer.from(message, 'base64');
-
+  const decodedMessage = Buffer.from(message);
   const verified = nacl.sign.detached.verify(
     decodedMessage,
     decodedSignature,
@@ -50,6 +48,7 @@ export const verify = async (
 
   return true;
 };
+
 export const proveTransaction = async (
   key: PublicKey | Keypair,
   signer?: SignCallback,

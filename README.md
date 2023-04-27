@@ -25,14 +25,15 @@ yarn add @identity.com/prove-solana-wallet
 prover side: 
 ```js
 const {create} = require('@identity.com/prove-solana-wallet');
-const nonce = new Date();
+const nonce = `${new Date().getTime()}`;
 const proof = await create(myKeypair, nonce);
 ```
 
 Verifier side:
 ```js
 const {verify} = require('@identity.com/prove-solana-wallet');
-await verify(expectedPublicKey, proof);
+const message = timestamp;
+await verify(expectedPublicKey, proof, message);
 ```
 
 ### prove ownership of a keypair using a transaction
