@@ -48,7 +48,7 @@ export const verify = async (
 
   return true;
 };
-export const prove = async (
+export const proveTransaction = async (
   key: PublicKey | Keypair,
   signer?: SignCallback,
   config: Config = DEFAULT_CONFIG

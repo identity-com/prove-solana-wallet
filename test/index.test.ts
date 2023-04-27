@@ -1,4 +1,4 @@
-import { prove, verifyTransaction, create, verify, SignMessageFn } from '../src';
+import { proveTransaction, verifyTransaction, create, verify, SignMessageFn } from '../src';
 import {
   Transaction,
   Connection,
@@ -49,19 +49,19 @@ describe('prove-solana-wallet', () => {
     });
   });
 
-  describe('prove and verifyTransaction', () => {
+  describe('proveTransaction and verifyTransaction', () => {
     it('verifies wallet ownership with provided key', async () => {
-      const proof = await prove(myKeypair);
+      const proof = await proveTransaction(myKeypair);
       await expect(verifyTransaction(proof, myKeypair.publicKey)).resolves.not.toThrow();
     });
 
-    it('proves ownership of an external wallet', async () => {
+    it('prove ownership of an external wallet', async () => {
       const externalWalletSignCallback = async (transaction: Transaction) => {
         transaction.sign(myKeypair);
         return transaction;
       };
   
-      const proof = await prove(myKeypair.publicKey, externalWalletSignCallback);
+      const proof = await proveTransaction(myKeypair.publicKey, externalWalletSignCallback);
       await expect(verifyTransaction(proof, myKeypair.publicKey)).resolves.not.toThrow();
     });
 
@@ -76,7 +76,7 @@ describe('prove-solana-wallet', () => {
         recentBlockCheck: true,
         broadcastCheck: true,
       };
-      const proof = await prove(myKeypair, undefined, config);
+      const proof = await proveTransaction(myKeypair, undefined, config);
       await expect(
         verifyTransaction(proof, myKeypair.publicKey, config)
       ).resolves.not.toThrow();
@@ -90,7 +90,7 @@ describe('prove-solana-wallet', () => {
         recentBlockCheck: true,
         broadcastCheck: true,
       };
-      const proof = await prove(myKeypair, undefined, config);
+      const proof = await proveTransaction(myKeypair, undefined, config);
       await expect(
         verifyTransaction(proof, myKeypair.publicKey, config)
       ).resolves.not.toThrow();
@@ -99,7 +99,7 @@ describe('prove-solana-wallet', () => {
     it('throws an error if the transaction is signed with a different key', async () => {
       const someOtherKey = Keypair.generate().publicKey;
   
-      const proof = await prove(myKeypair);
+      const proof = await proveTransaction(myKeypair);
       await expect(verifyTransaction(proof, someOtherKey)).rejects.toThrow();
     });
   
@@ -116,7 +116,7 @@ describe('prove-solana-wallet', () => {
           })
         );
   
-      const proof = await prove(myKeypair);
+      const proof = await proveTransaction(myKeypair);
       await expect(verifyTransaction(proof, myKeypair.publicKey)).rejects.toThrow(
         'Block was not found'
       );
@@ -140,7 +140,7 @@ describe('prove-solana-wallet', () => {
           })
         );
   
-      const proof = await prove(myKeypair);
+      const proof = await proveTransaction(myKeypair);
       await expect(
         verifyTransaction(proof, myKeypair.publicKey, config)
       ).resolves.not.toThrow();

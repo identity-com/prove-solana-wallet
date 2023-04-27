@@ -1,6 +1,6 @@
-# Prove-Solana-Wallet
+# prove-solana-wallet
 
-This library proves ownership of a [Solana](https://solana.com) wallet to off-chain verifiers.
+This library proveTransactions ownership of a [Solana](https://solana.com) wallet to off-chain verifiers.
 
 It is compatible with standard browser wallet adapters, such as 
 [sol-wallet-adapter](https://github.com/project-serum/sol-wallet-adapter), 
@@ -20,9 +20,9 @@ yarn add @identity.com/prove-solana-wallet
 
 ## Usage
 
-### Prove ownership of a keypair using a signed message
+### prove ownership of a keypair using a signed message
 
-Prover side: 
+prover side: 
 ```js
 const {create} = require('@identity.com/prove-solana-wallet');
 const nonce = new Date();
@@ -35,12 +35,12 @@ const {verify} = require('@identity.com/prove-solana-wallet');
 await verify(expectedPublicKey, proof);
 ```
 
-### Prove ownership of a keypair using a transaction
+### prove ownership of a keypair using a transaction
 
-Prover side: 
+prover side: 
 ```js
-const {prove} = require('@identity.com/prove-solana-wallet');
-const proof = await prove(myKeypair);
+const {proveTransaction} = require('@identity.com/prove-solana-wallet');
+const proof = await proveTransaction(myKeypair);
 ```
 
 Verifier side:
@@ -49,12 +49,12 @@ const {verifyTransaction} = require('@identity.com/prove-solana-wallet');
 await verifyTransaction(proof, expectedPublicKey);
 ```
 
-Prove ownership of an external wallet (e.g. sol-wallet-adapter).
+prove ownership of an external wallet (e.g. sol-wallet-adapter).
 See [here](https://github.com/project-serum/sol-wallet-adapter) for more details.
 
-Prover side:
+prover side:
 ```js
-const {prove} = require('@identity.com/prove-solana-wallet');
+const {proveTransaction} = require('@identity.com/prove-solana-wallet');
 import Wallet from "@project-serum/sol-wallet-adapter";
 
 const providerUrl = 'https://www.sollet.io';
@@ -63,7 +63,7 @@ wallet.on('connect', async (publicKey) => {
   // once the wallet is connected, we can prove ownership
   const signer = (transaction:Transaction) => wallet.signTransaction(transaction);
 
-  const proof = await prove(myKeypair);
+  const proof = await proveTransaction(myKeypair);
 });
 ```
 
@@ -81,7 +81,7 @@ The create(signMessageFn, message) function signs a message with the provided si
 The verify(publicKey, proof) function decodes the message and signature from the proof, and uses nacl to verify that the given public key signed the proof.
 
 ### Using a zero-value transaction
-The prove() function generates a zero-value transaction, and
+The proveTransaction() function generates a zero-value transaction, and
 signs it with the wallet private key. For the transaction to be verified
 by the verifyTransaction() function, it must:
 
@@ -97,7 +97,7 @@ a transaction or intercept a broadcast one.
 
 ## Configuration
 
-The prove and verifyTransaction functions can be configured as follows:
+The proveTransaction and verifyTransaction functions can be configured as follows:
 
 ### `cluster`
 
