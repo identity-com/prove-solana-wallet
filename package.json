@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.63.1",
-    "bs58": "^4.0.1"
+    "bs58": "^4.0.1",
+    "tweetnacl": "^1.0.3"
   }
 }

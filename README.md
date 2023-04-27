@@ -20,7 +20,22 @@ yarn add @identity.com/prove-solana-wallet
 
 ## Usage
 
-Prove ownership of a keypair
+### Prove ownership of a keypair using a signed message
+
+Prover side: 
+```js
+const {create} = require('@identity.com/prove-solana-wallet');
+const nonce = new Date();
+const proof = await create(myKeypair, nonce);
+```
+
+Verifier side:
+```js
+const {verify} = require('@identity.com/prove-solana-wallet');
+await verify(expectedPublicKey, proof);
+```
+
+### Prove ownership of a keypair using a transaction
 
 Prover side: 
 ```js
@@ -30,8 +45,8 @@ const proof = await prove(myKeypair);
 
 Verifier side:
 ```js
-const {verify} = require('@identity.com/prove-solana-wallet');
-await verify(proof, expectedPublicKey);
+const {verifyTransaction} = require('@identity.com/prove-solana-wallet');
+await verifyTransaction(proof, expectedPublicKey);
 ```
 
 Prove ownership of an external wallet (e.g. sol-wallet-adapter).
@@ -54,15 +69,21 @@ wallet.on('connect', async (publicKey) => {
 
 Verifier side:
 ```js
-const {verify} = require('@identity.com/prove-solana-wallet');
-await verify(proof, expectedPublicKey);
+const {verifyTransaction} = require('@identity.com/prove-solana-wallet');
+await verifyTransaction(proof, expectedPublicKey);
 ```
 
 ## Details
 
+### Using a signed message
+The create(signMessageFn, message) function signs a message with the provided signing function, then concatenates the message with the string, both in base64 encoded form, i.e. `${messageB64}.${signatureB64}`.
+
+The verify(publicKey, proof) function decodes the message and signature from the proof, and uses nacl to verify that the given public key signed the proof.
+
+### Using a zero-value transaction
 The prove() function generates a zero-value transaction, and
 signs it with the wallet private key. For the transaction to be verified
-by the verify() function, it must:
+by the verifyTransaction() function, it must:
 
 - have ony one instruction: SystemProgram.transfer
 - be zero-value
@@ -76,13 +97,13 @@ a transaction or intercept a broadcast one.
 
 ## Configuration
 
-The prove and verify functions can be configured as follows:
+The prove and verifyTransaction functions can be configured as follows:
 
 ### `cluster`
 
 Default: `mainnet-beta`
 
-The cluster that should be used when generating and verifying proofs
+The cluster that should be used when generating and verifyTransactioning proofs
 
 ### `commitment`
 

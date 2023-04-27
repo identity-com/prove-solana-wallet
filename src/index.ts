@@ -13,9 +13,41 @@ import {
   pubkeyOf,
   SignCallback,
 } from './utilities';
+import nacl from 'tweetnacl';
 
 export { SignCallback, Config, DEFAULT_CONFIG } from './utilities';
 
+export type SignMessageFn =(
+  message: string
+) => Promise<Uint8Array>;
+
+export const create = async (
+  signMessage: SignMessageFn,
+  message: string
+): Promise<string> => {
+  const signature = await signMessage(message);
+  if (!signature) throw new Error('Error creating signature');
+
+  const messageB64 = Buffer.from(message).toString('base64');
+  const signatureB64 = Buffer.from(signature).toString('base64');
+  return `${messageB64}.${signatureB64}`;
+};
+
+export const verify = async (
+  publicKey: PublicKey,
+  proof: string,
+): Promise<boolean> => {
+  const [message, signature] = proof.split('.');
+  const decodedSignature = Buffer.from(signature, 'base64');
+  const decodedMessage = Buffer.from(message, 'base64');
+
+  const verified = nacl.sign.detached.verify(decodedMessage, decodedSignature, publicKey.toBytes())
+  if (!verified) {
+    throw new Error('Invalid proof');
+  }
+
+  return true;
+};
 export const prove = async (
   key: PublicKey | Keypair,
   signer?: SignCallback,
@@ -50,7 +82,7 @@ export const verifyStatic = (evidence: Buffer, publicKey: PublicKey): void => {
   checkTransactionParameters(transaction);
 };
 
-export const verify = async (
+export const verifyTransaction = async (
   evidence: Buffer,
   publicKey: PublicKey,
   config: Config = DEFAULT_CONFIG
