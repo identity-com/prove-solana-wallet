@@ -222,19 +222,22 @@ describe('prove-solana-wallet', () => {
         });
         transaction.add(badInstruction);
         transaction.sign(myKeypair);
-  
+
         const proof = transaction.serialize();
         await expect(
           verifyTransaction(proof, myKeypair.publicKey)
-        ).rejects.toThrow('Incorrect instruction count. The transaction must contain only one Transfer instruction');
+        ).rejects.toThrow(
+          'Incorrect instruction count. The transaction must contain only one Transfer instruction'
+        );
       });
-  
+
       it('does not throw an error if the transaction extra instructions and computeBudget', async () => {
         const transactionPublicKey = new PublicKey(
           '4TTtkisSU2iuVYQuytKzEeZmuY8waZwgaQzLSXpZ5CrJ'
         );
         // this transaction has 3 instructions: one zero-amount transfer, and two 'computeBudget' instructions
-        const transaction = 'Ac826+f6a0l0Kcf2ACbgHHBOIuSmDWJP0c2VEtvmDttZxr7olZ5PAXTRbntBif+cYKMJ8Ugaz2FnGF5pGQrtNwIBAAIDM1qRrNuzTH+w7d2q2O27SdVMzqxO6kqGNLNShtqk0bcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMGRm/lIRcy/+ytunLDm+e8jOW7xfcSayxDmzpAAAAA40RbTFI3eSz8gWzJ80C8PQgDm5STQxWOOWMdm1ewk9wDAQIAAAwCAAAAAAAAAAAAAAACAAkDQB8AAAAAAAACAAUCQA0DAA==';
+        const transaction =
+          'Ac826+f6a0l0Kcf2ACbgHHBOIuSmDWJP0c2VEtvmDttZxr7olZ5PAXTRbntBif+cYKMJ8Ugaz2FnGF5pGQrtNwIBAAIDM1qRrNuzTH+w7d2q2O27SdVMzqxO6kqGNLNShtqk0bcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMGRm/lIRcy/+ytunLDm+e8jOW7xfcSayxDmzpAAAAA40RbTFI3eSz8gWzJ80C8PQgDm5STQxWOOWMdm1ewk9wDAQIAAAwCAAAAAAAAAAAAAAACAAkDQB8AAAAAAAACAAUCQA0DAA==';
         const proof = Buffer.from(transaction, 'base64');
         const config = {
           ...DEFAULT_CONFIG,
@@ -246,7 +249,7 @@ describe('prove-solana-wallet', () => {
         ).resolves.not.toThrow();
       });
     });
-   
+
     // Skip to avoid rate-limiting on mainnet - TODO switch this one to devnet
     it.skip('throws an error if the transaction was broadcast', async () => {
       // this is a self-to-self transaction broadcast to mainnet in july 2021

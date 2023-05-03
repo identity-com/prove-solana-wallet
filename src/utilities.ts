@@ -135,8 +135,16 @@ export const checkTransactionNotBroadcast = async (
 
 const instructionsToFilter = ['ComputeBudget111111111111111111111111111111'];
 export const checkTransactionParameters = (transaction: Transaction) => {
-  console.log('instructions program ids', transaction.instructions.map((instruction) => instruction.programId.toBase58()));
-  const filteredInstructions = transaction.instructions.filter((instruction: TransactionInstruction) => !instructionsToFilter.includes(instruction.programId.toBase58()));
+  console.log(
+    'instructions program ids',
+    transaction.instructions.map(instruction =>
+      instruction.programId.toBase58()
+    )
+  );
+  const filteredInstructions = transaction.instructions.filter(
+    (instruction: TransactionInstruction) =>
+      !instructionsToFilter.includes(instruction.programId.toBase58())
+  );
   if (filteredInstructions.length !== 1)
     throw new Error(
       'Incorrect instruction count. The transaction must contain only one Transfer instruction'
