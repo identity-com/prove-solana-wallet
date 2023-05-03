@@ -133,6 +133,8 @@ export const checkTransactionNotBroadcast = async (
     if (result) throw new Error('Transaction was broadcast!');
   });
 
+// Some wallets such as Phantom add extra 'compute budget' instructions to a transaction
+// so we want to exclude these from the instruction length check
 const instructionsToFilter = ['ComputeBudget111111111111111111111111111111'];
 export const checkTransactionParameters = (transaction: Transaction) => {
   console.log(
