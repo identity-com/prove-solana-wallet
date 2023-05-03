@@ -8,6 +8,7 @@ import {
   SystemInstruction,
   SystemProgram,
   Transaction,
+  TransactionInstruction,
   TransactionResponse,
 } from '@solana/web3.js';
 import { encode } from 'bs58';
@@ -132,13 +133,16 @@ export const checkTransactionNotBroadcast = async (
     if (result) throw new Error('Transaction was broadcast!');
   });
 
+const instructionsToFilter = ['ComputeBudget111111111111111111111111111111'];
 export const checkTransactionParameters = (transaction: Transaction) => {
-  if (transaction.instructions.length !== 1)
+  console.log('instructions program ids', transaction.instructions.map((instruction) => instruction.programId.toBase58()));
+  const filteredInstructions = transaction.instructions.filter((instruction: TransactionInstruction) => !instructionsToFilter.includes(instruction.programId.toBase58()));
+  if (filteredInstructions.length !== 1)
     throw new Error(
       'Incorrect instruction count. The transaction must contain only one Transfer instruction'
     );
 
-  const [instruction] = transaction.instructions;
+  const [instruction] = filteredInstructions;
 
   let transferParams;
   try {
