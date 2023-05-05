@@ -13,10 +13,43 @@ import {
   pubkeyOf,
   SignCallback,
 } from './utilities';
+import nacl from 'tweetnacl';
 
 export { SignCallback, Config, DEFAULT_CONFIG } from './utilities';
 
-export const prove = async (
+export type SignMessageFn = (message: string) => Promise<Uint8Array>;
+
+export const create = async (
+  signMessage: SignMessageFn,
+  message: string
+): Promise<string> => {
+  const signature = await signMessage(message);
+  if (!signature) throw new Error('Error creating signature');
+
+  const signatureB64 = Buffer.from(signature).toString('base64');
+  return `${signatureB64}`;
+};
+
+export const verify = (
+  publicKey: PublicKey,
+  signature: string,
+  message: string
+): boolean => {
+  const decodedSignature = Buffer.from(signature, 'base64');
+  const decodedMessage = Buffer.from(message);
+  const verified = nacl.sign.detached.verify(
+    decodedMessage,
+    decodedSignature,
+    publicKey.toBytes()
+  );
+  if (!verified) {
+    throw new Error('Invalid proof');
+  }
+
+  return true;
+};
+
+export const proveTransaction = async (
   key: PublicKey | Keypair,
   signer?: SignCallback,
   config: Config = DEFAULT_CONFIG
@@ -50,7 +83,7 @@ export const verifyStatic = (evidence: Buffer, publicKey: PublicKey): void => {
   checkTransactionParameters(transaction);
 };
 
-export const verify = async (
+export const verifyTransaction = async (
   evidence: Buffer,
   publicKey: PublicKey,
   config: Config = DEFAULT_CONFIG
